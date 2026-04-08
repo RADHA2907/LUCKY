@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anime_Rift — Your Ultimate Anime Universe</title>
+  <meta name="description" content="Explore trending, top-rated, and recently released anime on Anime_Rift. Search, bookmark, and discover your next favorite series." />
+  <meta name="keywords" content="anime, manga, streaming, Anime_Rift, top anime, trending anime" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <!-- Logo -->
+      <a href="index.html" class="nav-logo" id="nav-logo-link">
+        <img src="assets/logo.png" alt="Anime_Rift Logo" class="logo-img" id="logo-img" />
+        <span class="logo-text">Anime<span class="accent">_Rift</span></span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="search-wrapper" id="search-wrapper">
+        <div class="search-box">
+          <i class="fas fa-search search-icon" id="search-icon"></i>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search anime, genres, studios..."
+            autocomplete="off"
+          />
+          <button class="search-clear" id="search-clear" aria-label="Clear search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <!-- Live Suggestions Dropdown -->
+        <div class="suggestions-dropdown" id="suggestions-dropdown"></div>
+      </div>
+
+      <!-- Nav Right -->
+      <div class="nav-right">
+        <!-- Theme Toggle -->
+        <button class="nav-btn theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle Light/Dark Mode">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+
+        <!-- Favorites -->
+        <button class="nav-btn fav-btn" id="fav-btn" aria-label="Favorites" title="My Favorites">
+          <i class="fas fa-heart"></i>
+          <span class="fav-count" id="fav-count">0</span>
+        </button>
+
+        <!-- Auth Button -->
+        <button class="nav-btn auth-btn" id="auth-btn" aria-label="Login">
+          <i class="fas fa-user"></i>
+          <span id="auth-label">Login</span>
+        </button>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="nav-btn hamburger" id="hamburger" aria-label="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Search -->
+    <div class="mobile-search" id="mobile-search">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          id="mobile-search-input"
+          class="search-input"
+          placeholder="Search anime..."
+          autocomplete="off"
+        />
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== HERO SECTION ========== -->
+  <section class="hero-section" id="hero-section">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content" id="hero-content">
+      <div class="hero-badge"><i class="fas fa-fire"></i> Featured Anime</div>
+      <h1 class="hero-title" id="hero-title">Loading...</h1>
+      <div class="hero-meta" id="hero-meta"></div>
+      <p class="hero-synopsis" id="hero-synopsis"></p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="hero-details-btn"><i class="fas fa-info-circle"></i> View Details</button>
+        <button class="btn-outline" id="hero-fav-btn"><i class="fas fa-heart"></i> Add to Favorites</button>
+      </div>
+    </div>
+    <!-- Dots navigation -->
+    <div class="hero-dots" id="hero-dots"></div>
+  </section>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+
+    <!-- ===== FILTER BAR ===== -->
+    <section class="filter-section" id="filter-section">
+      <div class="container">
+        <div class="filter-bar">
+          <!-- Genre Pills -->
+          <div class="genre-pills" id="genre-pills">
+            <button class="genre-pill active" data-genre="" id="genre-all">All</button>
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="sort-group">
+            <label for="sort-select" class="sort-label"><i class="fas fa-sort"></i></label>
+            <select class="sort-select" id="sort-select">
+              <option value="bypopularity">Popularity</option>
+              <option value="favorite">Most Favorited</option>
+              <option value="score">Top Rated</option>
+              <option value="upcoming">Upcoming</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SEARCH RESULTS (hidden by default) ===== -->
+    <section class="section search-results-section hidden" id="search-results-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-search"></i> Search Results</h2>
+          <span class="result-count" id="result-count"></span>
+        </div>
+        <div class="anime-grid" id="search-results-grid"></div>
+        <div class="pagination" id="search-pagination"></div>
+      </div>
+    </section>
+
+    <!-- ===== TRENDING NOW ===== -->
+    <section class="section" id="trending-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-fire-flame-curved"></i> Trending Now</h2>
+          <a href="#" class="see-all" data-target="trending">See All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="scroll-row-wrapper">
+          <button class="scroll-btn scroll-left" data-target="trending-row" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+          <div class="scroll-row" id="trending-row"></div>
+          <button class="scroll-btn scroll-right" data-target="trending-row" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TOP RATED ===== -->
+    <section class="section" id="top-rated-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-star"></i> Top Rated</h2>
+          <a href="#" class="see-all" data-target="toprated">See All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="anime-grid" id="top-rated-grid"></div>
+        <div class="pagination" id="top-rated-pagination"></div>
+      </div>
+    </section>
+
+    <!-- ===== RECENTLY RELEASED ===== -->
+    <section class="section" id="recent-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-calendar-check"></i> Recently Released</h2>
+          <a href="#" class="see-all" data-target="recent">See All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="anime-grid" id="recent-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== POPULAR BY GENRE ===== -->
+    <section class="section" id="genre-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-tags"></i> Browse by Genre</h2>
+        </div>
+        <div class="genre-showcase" id="genre-showcase"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== FAVORITES SIDEBAR ========== -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="favorites-sidebar" id="favorites-sidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-heart"></i> My Favorites</h3>
+      <button class="sidebar-close" id="sidebar-close" aria-label="Close favorites"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="favorites-list" id="favorites-list"></div>
+    <div class="favorites-empty" id="favorites-empty">
+      <i class="fas fa-heart-crack"></i>
+      <p>No favorites yet.<br/>Start adding anime you love!</p>
+    </div>
+  </aside>
+
+  <!-- ========== AUTH MODAL ========== -->
+  <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="modal auth-modal" id="auth-modal">
+      <button class="modal-close" id="auth-modal-close" aria-label="Close"><i class="fas fa-times"></i></button>
+      <div class="modal-logo">
+        <img src="assets/logo.png" alt="Anime_Rift" class="modal-logo-img" />
+        <span class="logo-text">Anime<span class="accent">_Rift</span></span>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" data-tab="login">Login</button>
+        <button class="auth-tab" id="tab-signup" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <form class="auth-form" id="login-form">
+        <div class="form-group">
+          <label for="login-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password"><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="login-submit">Login</button>
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="btn-google" id="google-login">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+        <p class="auth-error hidden" id="login-error"></p>
+      </form>
+
+      <!-- Signup Form -->
+      <form class="auth-form hidden" id="signup-form">
+        <div class="form-group">
+          <label for="signup-name"><i class="fas fa-user"></i> Display Name</label>
+          <input type="text" id="signup-name" placeholder="Your Name" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="signup-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-password"><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="signup-password" placeholder="Min. 6 characters" required />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="signup-submit">Create Account</button>
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="btn-google" id="google-signup">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+        <p class="auth-error hidden" id="signup-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ========== LOADING OVERLAY ========== -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="Anime_Rift" class="footer-logo" />
+          <span class="logo-text">Anime<span class="accent">_Rift</span></span>
+          <p class="footer-tagline">Your ultimate anime universe. Discover, explore, and bookmark your favorite anime series.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+            <a href="#" aria-label="Reddit"><i class="fab fa-reddit"></i></a>
+            <a href="#" aria-label="Youtube"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="#trending-section">Trending</a></li>
+            <li><a href="#top-rated-section">Top Rated</a></li>
+            <li><a href="#recent-section">Recently Released</a></li>
+            <li><a href="#genre-section">Browse by Genre</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#">About Anime_Rift</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Powered By</h4>
+          <ul>
+            <li><a href="https://jikan.moe" target="_blank" rel="noopener">Jikan API v4</a></li>
+            <li><a href="https://myanimelist.net" target="_blank" rel="noopener">MyAnimeList Data</a></li>
+            <li><a href="https://firebase.google.com" target="_blank" rel="noopener">Firebase Auth</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Anime_Rift. All rights reserved. Data provided by <a href="https://jikan.moe" target="_blank" rel="noopener">Jikan API</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

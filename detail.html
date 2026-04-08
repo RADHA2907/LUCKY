@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anime Details — Anime_Rift</title>
+  <meta name="description" content="View detailed information about anime including synopsis, characters, trailer, and ratings on Anime_Rift." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" id="nav-logo-link">
+        <img src="assets/logo.png" alt="Anime_Rift Logo" class="logo-img" id="logo-img" />
+        <span class="logo-text">Anime<span class="accent">_Rift</span></span>
+      </a>
+
+      <div class="search-wrapper" id="search-wrapper">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="Search anime..."
+            autocomplete="off"
+          />
+          <button class="search-clear" id="search-clear" aria-label="Clear search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="suggestions-dropdown" id="suggestions-dropdown"></div>
+      </div>
+
+      <div class="nav-right">
+        <button class="nav-btn theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle Light/Dark Mode">
+          <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+        <button class="nav-btn fav-btn" id="fav-btn" aria-label="Favorites" title="My Favorites">
+          <i class="fas fa-heart"></i>
+          <span class="fav-count" id="fav-count">0</span>
+        </button>
+        <button class="nav-btn auth-btn" id="auth-btn" aria-label="Login">
+          <i class="fas fa-user"></i>
+          <span id="auth-label">Login</span>
+        </button>
+        <button class="nav-btn hamburger" id="hamburger" aria-label="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== DETAIL HERO ========== -->
+  <div class="detail-hero" id="detail-hero">
+    <div class="detail-hero-bg" id="detail-hero-bg"></div>
+    <div class="detail-hero-overlay"></div>
+  </div>
+
+  <!-- ========== DETAIL MAIN ========== -->
+  <main class="main-content detail-main">
+    <div class="container">
+
+      <!-- Back button -->
+      <a href="index.html" class="back-btn" id="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+
+      <!-- Detail Layout -->
+      <div class="detail-layout" id="detail-layout">
+
+        <!-- LEFT: Poster + Quick Actions -->
+        <aside class="detail-sidebar">
+          <div class="poster-wrapper" id="poster-wrapper">
+            <div class="skeleton-box" style="height:420px;"></div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-primary full-width" id="detail-fav-btn">
+              <i class="fas fa-heart"></i> Add to Favorites
+            </button>
+            <button class="btn-outline full-width" id="detail-share-btn" onclick="navigator.clipboard.writeText(window.location.href); this.innerHTML='<i class=\'fas fa-check\'></i> Copied!'">
+              <i class="fas fa-share-alt"></i> Share
+            </button>
+          </div>
+
+          <!-- Quick Info Card -->
+          <div class="quick-info glass-card" id="quick-info">
+            <div class="skeleton-lines">
+              <div class="skeleton-box sh16 sw80"></div>
+              <div class="skeleton-box sh12 sw60"></div>
+              <div class="skeleton-box sh12 sw70"></div>
+              <div class="skeleton-box sh12 sw50"></div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- RIGHT: Main Info -->
+        <section class="detail-body">
+          <!-- Title & Rating -->
+          <div class="detail-title-block" id="detail-title-block">
+            <div class="skeleton-box sh40 sw80" style="margin-bottom:12px;"></div>
+            <div class="skeleton-box sh20 sw50"></div>
+          </div>
+
+          <!-- Rating Pills -->
+          <div class="rating-bar" id="rating-bar"></div>
+
+          <!-- Genres -->
+          <div class="genres-row" id="genres-row"></div>
+
+          <!-- Synopsis -->
+          <div class="synopsis-block" id="synopsis-block">
+            <h3 class="detail-section-label"><i class="fas fa-scroll"></i> Synopsis</h3>
+            <div class="skeleton-lines">
+              <div class="skeleton-box sh14 sw100"></div>
+              <div class="skeleton-box sh14 sw95"></div>
+              <div class="skeleton-box sh14 sw88"></div>
+              <div class="skeleton-box sh14 sw70"></div>
+            </div>
+          </div>
+
+          <!-- Trailer -->
+          <div class="trailer-block" id="trailer-block">
+            <h3 class="detail-section-label"><i class="fas fa-film"></i> Trailer</h3>
+            <div class="trailer-placeholder">
+              <i class="fas fa-play-circle"></i>
+              <span>Loading trailer...</span>
+            </div>
+          </div>
+
+          <!-- Characters -->
+          <div class="characters-block" id="characters-block">
+            <h3 class="detail-section-label"><i class="fas fa-users"></i> Characters</h3>
+            <div class="characters-scroll" id="characters-scroll">
+              <!-- Skeleton chars -->
+              <div class="char-card skeleton-card"></div>
+              <div class="char-card skeleton-card"></div>
+              <div class="char-card skeleton-card"></div>
+              <div class="char-card skeleton-card"></div>
+              <div class="char-card skeleton-card"></div>
+            </div>
+          </div>
+
+          <!-- Related Recommendations -->
+          <div class="related-block" id="related-block">
+            <h3 class="detail-section-label"><i class="fas fa-film"></i> You May Also Like</h3>
+            <div class="scroll-row" id="related-row"></div>
+          </div>
+
+        </section>
+      </div><!-- /detail-layout -->
+    </div>
+  </main>
+
+  <!-- ========== FAVORITES SIDEBAR ========== -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <aside class="favorites-sidebar" id="favorites-sidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-heart"></i> My Favorites</h3>
+      <button class="sidebar-close" id="sidebar-close" aria-label="Close favorites"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="favorites-list" id="favorites-list"></div>
+    <div class="favorites-empty" id="favorites-empty">
+      <i class="fas fa-heart-crack"></i>
+      <p>No favorites yet.</p>
+    </div>
+  </aside>
+
+  <!-- ========== AUTH MODAL ========== -->
+  <div class="modal-overlay" id="auth-modal-overlay">
+    <div class="modal auth-modal" id="auth-modal">
+      <button class="modal-close" id="auth-modal-close" aria-label="Close"><i class="fas fa-times"></i></button>
+      <div class="modal-logo">
+        <img src="assets/logo.png" alt="Anime_Rift" class="modal-logo-img" />
+        <span class="logo-text">Anime<span class="accent">_Rift</span></span>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" data-tab="login">Login</button>
+        <button class="auth-tab" id="tab-signup" data-tab="signup">Sign Up</button>
+      </div>
+      <form class="auth-form" id="login-form">
+        <div class="form-group">
+          <label for="login-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password"><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="login-submit">Login</button>
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="btn-google" id="google-login">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+        <p class="auth-error hidden" id="login-error"></p>
+      </form>
+      <form class="auth-form hidden" id="signup-form">
+        <div class="form-group">
+          <label for="signup-name"><i class="fas fa-user"></i> Display Name</label>
+          <input type="text" id="signup-name" placeholder="Your Name" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="signup-email" placeholder="your@email.com" required />
+        </div>
+        <div class="form-group">
+          <label for="signup-password"><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="signup-password" placeholder="Min. 6 characters" required />
+        </div>
+        <button type="submit" class="btn-primary full-width" id="signup-submit">Create Account</button>
+        <div class="auth-divider"><span>or</span></div>
+        <button type="button" class="btn-google" id="google-signup">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+        <p class="auth-error hidden" id="signup-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== TOAST ========== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="firebase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="detail.js"></script>
+</body>
+</html>
